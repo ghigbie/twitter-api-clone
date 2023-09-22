@@ -63,6 +63,14 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+//relationship between the tweets and the user
+
+userSchema.virtual("tweets", {
+  ref: "Tweet",
+  localField: "_id",
+  foreignField: "user",
+});
+
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
@@ -82,6 +90,21 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
+
+//Authentication check
+userSchema.statics.findByCredentials = async (email, password) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error("Unable to login");
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error("Unable to login");
+  }
+
+  return user;
+};
 
 const User = mongoose.model("User", userSchema);
 

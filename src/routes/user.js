@@ -31,4 +31,23 @@ router.get("/users/:id", async (req, res) => {
   }
 });
 
+//Login User Routers
+
+router.post("/users/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).send({ error: "Email and password are required" });
+    }
+    const user = await User.findByCredentials(email, password);
+    res.status(200).send(user);
+  } catch (err) {
+    if (err.message === "Unable to login") {
+      res.status(401).send({ error: "Invalid login credentials" });
+    } else {
+      res.status(500).send({ error: err.message });
+    }
+  }
+});
+
 module.exports = router;

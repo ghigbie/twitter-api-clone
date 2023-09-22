@@ -40,7 +40,8 @@ router.post("/users/login", async (req, res) => {
       return res.status(400).send({ error: "Email and password are required" });
     }
     const user = await User.findByCredentials(email, password);
-    res.status(200).send(user);
+    const token = await user.generateAuthToken();
+    res.status(200).send({ user, token });
   } catch (err) {
     if (err.message === "Unable to login") {
       res.status(401).send({ error: "Invalid login credentials" });
